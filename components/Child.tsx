@@ -25,18 +25,28 @@ export default function Child() {
   const { mutateAsync: mintAsync } = useContractWrite(contract, "alMint");
 
   useEffect(() => {
-    if (address && maxMintQuantity && mintedQuantity) {
-      const maxMint = maxMintQuantity.toNumber()
-      const minted = mintedQuantity.toNumber()
-      const mintable = maxMint - minted
-      setMintableQuantity(mintable)
-      setMintCount(mintable)
+    if (phase === 1) {
+      if (address && maxMintQuantity && mintedQuantity) {
+        const maxMint = maxMintQuantity.toNumber()
+        const minted = mintedQuantity.toNumber()
+        const mintable = maxMint - minted
+        setMintableQuantity(mintable)
+        setMintCount(mintable)
+      }
+    } else if (phase === 2) {
+      setMintCount(2)
     }
-  }, [address, maxMintQuantity, mintedQuantity])
+  }, [address, maxMintQuantity, mintedQuantity, phase])
 
   const countUp = () => {
-    if (mintCount + 1 <= mintableQuantity) {
-      setMintCount(prevState => prevState + 1)
+    if (phase === 1) {
+      if (mintCount + 1 <= mintableQuantity) {
+        setMintCount(prevState => prevState + 1)
+      }
+    } else if (phase === 2) {
+      if (mintCount + 1 <= 2) {
+        setMintCount(prevState => prevState + 1)
+      }
     }
   }
 
