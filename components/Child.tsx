@@ -7,7 +7,7 @@ import {
   Web3Button
 } from "@thirdweb-dev/react";
 import { ethers } from "ethers";
-import { contractAddress, mintPrice } from "@/app/_config/blockchain";
+import { contractAddress, maxMintPerTx, mintPrice } from "@/app/_config/blockchain";
 import { ABI } from "@/app/_config/abi";
 import { useEffect, useState } from "react";
 
@@ -16,38 +16,43 @@ const zeroAddress = "0x0000000000000000000000000000000000000000"
 export default function Child() {
   const [mintCount, setMintCount] = useState<number>(0)
   const [isSoldOut, setIsSoldOut] = useState<boolean>(false)
-  const [mintableQuantity, setMintableQuantity] = useState<number>(0)
+  const [canMintAmount, setCanMintAmount] = useState<number>(0)
 
   const { contract } = useContract(contractAddress, ABI);
-  const address = useAddress();
+  const connectedAddress = useAddress();
 
   // コントラクトからのRead
   const { data: totalSupply = 0 } = useContractRead(contract, "totalSupply");
   const { data: phase = undefined } = useContractRead(contract, "phase");
-  const { data: maxMintQuantity = 0 } = useContractRead(contract, "allowList", [address || zeroAddress]);
-  const { data: mintedQuantity = 0 } = useContractRead(contract, "presaleMinted", [address || zeroAddress]);
+  const { data: allowList = 0 } = useContractRead(contract, "allowList", [connectedAddress || zeroAddress]);
+  const { data: presaleMinted = 0 } = useContractRead(contract, "presaleMinted", [connectedAddress || zeroAddress]);
 
   // コントラクトへWrite
   const { mutateAsync: alMint } = useContractWrite(contract, "alMint");
   const { mutateAsync: publicMint } = useContractWrite(contract, "publicMint");
 
+  // セール時のMint可能枚数を設定します
   useEffect(() => {
     if (phase === 1) {
-      if (address && maxMintQuantity && mintedQuantity) {
-        const maxMint = maxMintQuantity.toNumber()
-        const minted = mintedQuantity.toNumber()
-        const mintable = maxMint - minted
-        setMintableQuantity(mintable)
-        setMintCount(mintable)
+      // ALセールの時、Mint可能枚数を算出します
+      if (connectedAddress && allowList && presaleMinted) {
+        const al = allowList.toNumber()
+        const minted = presaleMinted.toNumber()
+        const mintableAmount = al - minted
+
+        setCanMintAmount(mintableAmount)
+        setMintCount(mintableAmount)
       }
     } else if (phase === 2) {
-      setMintCount(2)
+      // パブリックセールの時、Mint上限をセットします
+      setMintCount(maxMintPerTx)
     }
-  }, [address, maxMintQuantity, mintedQuantity, phase])
+  }, [connectedAddress, allowList, presaleMinted, phase])
 
+  // カウントアップです
   const countUp = () => {
     if (phase === 1) {
-      if (mintCount + 1 <= mintableQuantity) {
+      if (mintCount + 1 <= canMintAmount) {
         setMintCount(prevState => prevState + 1)
       }
     } else if (phase === 2) {
@@ -57,6 +62,7 @@ export default function Child() {
     }
   }
 
+  // カウントダウンです
   const countDown = () => {
     if (mintCount - 1 >= 0) {
       setMintCount(prevState => prevState - 1)
@@ -65,9 +71,12 @@ export default function Child() {
 
   return (
     <>
+      {/* ヘッダー */}
       <header className="fixed py-3 px-3 w-full flex flex-row-reverse z-10 shadow">
         <ConnectWallet theme={"dark"}/>
       </header>
+
+      {/* 本体 */}
       <div className="relative isolate overflow-hidden pt-14 min-h-screen">
         <div className="mx-auto max-w-2xl py-20 flex flex-col items-center">
 
@@ -75,8 +84,12 @@ export default function Child() {
             The ANARCHY
           </h1>
 
-          <p className="mt-6 text-lg leading-8 text-gray-500">
-            The ANARCHYの説明が入ります。
+          <p className="mt-6 text-base leading-8 text-gray-500">
+            PreSale: 11月7日（水）20:00〜<br/>
+            PublicSale: 11月9日（金）20:00〜<br/>
+          </p>
+          <p className="mt-2 text-base leading-8 text-gray-500">
+            0.05ETH/枚
           </p>
 
           <div className="mt-5 font-bold text-2xl">
@@ -84,7 +97,7 @@ export default function Child() {
           </div>
 
           {/*Mintのセクション */}
-          {phase === 0 ? (
+          {phase !== undefined ? phase === 0 ? (
             <h1 className="text-3xl italic mt-12 font-bold tracking-tight text-gray-500">
               coming soon...
             </h1>
@@ -105,11 +118,14 @@ export default function Child() {
                 isDisabled={isSoldOut}
                 theme={isSoldOut ? "light" : "dark"}
                 action={async () => {
-                  await publicMint({ args: [mintCount] })
+                  await publicMint({
+                    args: [mintCount],
+                    overrides: {
+                      value: ethers.utils.parseEther("0.1")
+                    }
+                  })
                 }}
-                overrides={{
-                  value: ethers.utils.parseEther((mintCount * mintPrice).toString())
-                }}
+                overrides={{}}
                 onSuccess={(result) => alert("ミントが完了しました！")}
                 onError={(error) => {
                   console.error(error)
@@ -131,7 +147,7 @@ export default function Child() {
                 +
               </button>
             </div>
-          )}
+          ) : ""}
 
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { Goerli } from "@thirdweb-dev/chains";
 
 export const activeChain = Goerli
-export const contractAddress = "0x10C5aE4EB0EfDbD592fF8a7C77f622d65885176D"
-export const symbol = "TEST"
+export const contractAddress = "0xEB9337a93974D5ddfCA06B730d36bC61d96222Db"
 export const mintPrice = 0.05
+export const maxMintPerTx = 5
