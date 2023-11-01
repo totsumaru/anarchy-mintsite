@@ -10,6 +10,7 @@ import { ethers } from "ethers";
 import { contractAddress, maxMintPerTx, maxSupply, mintPrice } from "@/app/_config/blockchain";
 import { ABI } from "@/app/_config/abi";
 import { useEffect, useState } from "react";
+import Footer from "@/components/Footer";
 
 const zeroAddress = "0x0000000000000000000000000000000000000000"
 
@@ -78,7 +79,7 @@ export default function Child() {
   return (
     <>
       {/* ヘッダー */}
-      <header className="fixed py-3 px-3 w-full flex flex-row-reverse z-10 shadow">
+      <header className="fixed py-3 px-3 w-full flex flex-row-reverse z-10">
         <ConnectWallet theme={"dark"}/>
       </header>
 
@@ -167,6 +168,7 @@ export default function Child() {
           ) : ""}
 
         </div>
+        <Footer/>
       </div>
     </>
   )
