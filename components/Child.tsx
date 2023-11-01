@@ -85,8 +85,8 @@ export default function Child() {
           </h1>
 
           <p className="mt-6 text-base leading-8 text-gray-800">
-            PreSale: 11月7日（水）20:00〜<br/>
-            PublicSale: 11月9日（金）20:00〜<br/>
+            PreSale: 11月8日（水）20:00〜<br/>
+            PublicSale: 11月10日（金）20:00〜<br/>
           </p>
           <p className="mt-2 text-base leading-8 text-gray-700">
             0.05ETH/枚
