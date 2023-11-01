@@ -4,3 +4,4 @@ export const activeChain = Goerli
 export const contractAddress = "0xEB9337a93974D5ddfCA06B730d36bC61d96222Db"
 export const mintPrice = 0.05
 export const maxMintPerTx = 5
+export const maxSupply = 1550

@@ -7,7 +7,7 @@ import {
   Web3Button
 } from "@thirdweb-dev/react";
 import { ethers } from "ethers";
-import { contractAddress, maxMintPerTx, mintPrice } from "@/app/_config/blockchain";
+import { contractAddress, maxMintPerTx, maxSupply, mintPrice } from "@/app/_config/blockchain";
 import { ABI } from "@/app/_config/abi";
 import { useEffect, useState } from "react";
 
@@ -48,6 +48,12 @@ export default function Child() {
       setMintCount(maxMintPerTx)
     }
   }, [connectedAddress, allowList, presaleMinted, phase])
+
+  useEffect(() => {
+    if (totalSupply.toString() === maxSupply.toString()) {
+      setIsSoldOut(true)
+    }
+  }, [totalSupply])
 
   // カウントアップです
   const countUp = () => {
@@ -93,11 +99,15 @@ export default function Child() {
           </p>
 
           <div className="mt-5 font-bold text-2xl">
-            <p className="px-5 py-3 ring-1 rounded-xl ring-gray-800">{totalSupply.toString()} / 1550</p>
+            <p className="px-5 py-3 ring-1 rounded-xl ring-gray-800">{totalSupply.toString()} / {maxSupply}</p>
           </div>
 
           {/*Mintのセクション */}
-          {phase !== undefined ? phase === 0 ? (
+          {isSoldOut ? (
+            <h1 className="text-3xl mt-12 font-bold tracking-tight text-black">
+              SOLD OUT!!!🎉
+            </h1>
+          ) : phase !== undefined ? phase === 0 ? (
             <h1 className="text-3xl italic mt-12 font-bold tracking-tight text-gray-500">
               coming soon...
             </h1>
