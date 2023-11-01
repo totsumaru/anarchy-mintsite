@@ -6,10 +6,12 @@ import {
   useContractWrite,
   Web3Button
 } from "@thirdweb-dev/react";
-
-import { contractAddress } from "@/app/_config/blockchain";
+import { ethers } from "ethers";
+import { contractAddress, mintPrice } from "@/app/_config/blockchain";
 import { ABI } from "@/app/_config/abi";
 import { useEffect, useState } from "react";
+
+const zeroAddress = "0x0000000000000000000000000000000000000000"
 
 export default function Child() {
   const [mintCount, setMintCount] = useState<number>(0)
@@ -18,11 +20,16 @@ export default function Child() {
 
   const { contract } = useContract(contractAddress, ABI);
   const address = useAddress();
+
+  // コントラクトからのRead
   const { data: totalSupply = 0 } = useContractRead(contract, "totalSupply");
-  const { data: phase } = useContractRead(contract, "phase");
-  const { data: maxMintQuantity } = useContractRead(contract, "allowList", [address]);
-  const { data: mintedQuantity } = useContractRead(contract, "presaleMinted", [address]);
-  const { mutateAsync: mintAsync } = useContractWrite(contract, "alMint");
+  const { data: phase = undefined } = useContractRead(contract, "phase");
+  const { data: maxMintQuantity = 0 } = useContractRead(contract, "allowList", [address || zeroAddress]);
+  const { data: mintedQuantity = 0 } = useContractRead(contract, "presaleMinted", [address || zeroAddress]);
+
+  // コントラクトへWrite
+  const { mutateAsync: alMint } = useContractWrite(contract, "alMint");
+  const { mutateAsync: publicMint } = useContractWrite(contract, "publicMint");
 
   useEffect(() => {
     if (phase === 1) {
@@ -76,7 +83,7 @@ export default function Child() {
             <p className="px-5 py-3 ring-1 rounded-xl ring-gray-300">{totalSupply.toString()} / 1550</p>
           </div>
 
-          {/* Mintのセクション */}
+          {/*Mintのセクション */}
           {phase === 0 ? (
             <h1 className="text-3xl italic mt-12 font-bold tracking-tight text-gray-500">
               coming soon...
@@ -98,12 +105,16 @@ export default function Child() {
                 isDisabled={isSoldOut}
                 theme={isSoldOut ? "light" : "dark"}
                 action={async () => {
-                  await mintAsync({ args: [mintCount] })
+                  await publicMint({ args: [mintCount] })
+                }}
+                overrides={{
+                  value: ethers.utils.parseEther((mintCount * mintPrice).toString())
                 }}
                 onSuccess={(result) => alert("ミントが完了しました！")}
                 onError={(error) => {
                   console.error(error)
-                  alert("エラーが発生しました")
+                  console.log("価格: ", mintCount * mintPrice)
+                  alert(`エラーが発生しました: ${error}}`,)
                 }}
               >
                 {isSoldOut ? "SOLD OUT!!!🎉" : (

@@ -11,7 +11,7 @@ export default function Home(): ReactElement {
 
   return (
     <ThirdwebProvider
-      clientId={process.env.NEXT_PUBLIC_CLIENT_ID}
+      clientId={process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID}
       activeChain={activeChain}
     >
       <Child/>
