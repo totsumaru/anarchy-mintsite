@@ -77,23 +77,23 @@ export default function Child() {
       </header>
 
       {/* 本体 */}
-      <div className="relative isolate overflow-hidden pt-14 min-h-screen">
+      <div className="relative isolate overflow-hidden pt-14">
         <div className="mx-auto max-w-2xl py-20 flex flex-col items-center">
 
           <h1 className="text-4xl font-bold tracking-tight text-gray-800 sm:text-6xl">
             The ANARCHY
           </h1>
 
-          <p className="mt-6 text-base leading-8 text-gray-500">
+          <p className="mt-6 text-base leading-8 text-gray-800">
             PreSale: 11月7日（水）20:00〜<br/>
             PublicSale: 11月9日（金）20:00〜<br/>
           </p>
-          <p className="mt-2 text-base leading-8 text-gray-500">
+          <p className="mt-2 text-base leading-8 text-gray-700">
             0.05ETH/枚
           </p>
 
           <div className="mt-5 font-bold text-2xl">
-            <p className="px-5 py-3 ring-1 rounded-xl ring-gray-300">{totalSupply.toString()} / 1550</p>
+            <p className="px-5 py-3 ring-1 rounded-xl ring-gray-800">{totalSupply.toString()} / 1550</p>
           </div>
 
           {/*Mintのセクション */}
@@ -106,42 +106,49 @@ export default function Child() {
               {/* マイナスボタン */}
               <button
                 type="button"
-                className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-800 hover:bg-gray-50"
                 onClick={countDown}
               >
                 -
               </button>
 
-              <Web3Button
-                contractAddress={contractAddress}
-                contractAbi={ABI}
-                isDisabled={isSoldOut}
-                theme={isSoldOut ? "light" : "dark"}
-                action={async () => {
-                  await publicMint({
-                    args: [mintCount],
-                    overrides: {
-                      value: ethers.utils.parseEther("0.1")
+              <div className="ring-1 rounded-md ring-black">
+                <Web3Button
+                  contractAddress={contractAddress}
+                  contractAbi={ABI}
+                  isDisabled={isSoldOut || mintCount === 0}
+                  theme={"dark"}
+                  action={async () => {
+                    const value = ethers.utils.parseEther((mintCount * mintPrice).toString())
+                    if (phase === 1) {
+                      await alMint({
+                        args: [mintCount],
+                        overrides: { value: value }
+                      })
+                    } else if (phase === 2) {
+                      await publicMint({
+                        args: [mintCount],
+                        overrides: { value: value }
+                      })
                     }
-                  })
-                }}
-                overrides={{}}
-                onSuccess={(result) => alert("ミントが完了しました！")}
-                onError={(error) => {
-                  console.error(error)
-                  console.log("価格: ", mintCount * mintPrice)
-                  alert(`エラーが発生しました: ${error}}`,)
-                }}
-              >
-                {isSoldOut ? "SOLD OUT!!!🎉" : (
-                  <><span className="font-bold mr-1">{mintCount}</span>Mint</>
-                )}
-              </Web3Button>
+                  }}
+                  overrides={{}}
+                  onSuccess={() => alert("ミントが完了しました！")}
+                  onError={(error) => {
+                    console.error(error)
+                    alert(`エラーが発生しました\n ${error.message}`,)
+                  }}
+                >
+                  {isSoldOut ? "SOLD OUT!!!🎉" : (
+                    <><span className="font-bold mr-1">{phase === 1 ? "AL:" : "Public:"} {mintCount}</span>Mint</>
+                  )}
+                </Web3Button>
+              </div>
 
               {/* プラスボタン */}
               <button
                 type="button"
-                className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-800 hover:bg-gray-50"
                 onClick={countUp}
               >
                 +

@@ -8,13 +8,17 @@ import Child from "@/components/Child";
 
 export default function Home(): ReactElement {
 
-
   return (
+
     <ThirdwebProvider
       clientId={process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID}
       activeChain={activeChain}
     >
-      <Child/>
+      <div className="min-h-screen bg-[url('/bg-light.png')]">
+        <div className="bg-white bg-opacity-20 h-screen">
+          <Child/>
+        </div>
+      </div>
     </ThirdwebProvider>
   )
 }
