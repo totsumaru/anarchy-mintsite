@@ -100,7 +100,9 @@ export default function Child() {
           </p>
 
           <div className="mt-5 font-bold text-2xl">
-            <p className="px-5 py-3 ring-1 rounded-xl ring-gray-800">{totalSupply.toString()} / {maxSupply}</p>
+            <p className="px-5 py-3 ring-1 rounded-xl ring-gray-800">{totalSupply.toString()} / <span
+              className="text-lg font-normal">{maxSupply}<span className="text-sm">(MAX)</span></span>
+            </p>
           </div>
 
           {/*Mintのセクション */}
